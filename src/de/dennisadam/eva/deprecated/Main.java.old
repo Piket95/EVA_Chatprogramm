@@ -1,4 +1,7 @@
-package de.dennisadam.eva;
+package de.dennisadam.eva.deprecated;
+
+import de.dennisadam.eva.client.Client;
+import de.dennisadam.eva.server.Server;
 
 import java.util.Scanner;
 
@@ -33,6 +36,12 @@ public class Main {
 
     private static void startClient(){
         System.out.println("Starting Client...");
+        String hostname = "localhost";
+
+        //TODO: Abfrage mit welcher IP verbunden werden soll
+
+        Client client = new Client(hostname);
+        client.request();
     }
 
     private static void startServer(){
