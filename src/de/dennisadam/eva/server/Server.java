@@ -1,41 +1,53 @@
 package de.dennisadam.eva.server;
 
-import java.io.BufferedReader;
+import de.dennisadam.eva.user.User;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
+    public static List<User> userList;
+    private static int port;
+
     public static void main(String[] args) {
+        ExecutorService executor = Executors.newFixedThreadPool(20);
 
-        System.out.println("Starte TCP Listening auf Port 1608!");
+        if(args.length == 0){
+            System.err.println("Usage: java -cp Server <listening port>");
+            System.exit(0);
+        } else {
+            port = Integer.parseInt(args[0]);
+            System.out.println(port);
+        }
 
-        while(true){
-            try(ServerSocket serverSocket = new ServerSocket(1608)){
-                System.out.println("[Server/TCP] Warte auf eingehende Verbindung...");
-                Socket client = serverSocket.accept();
-                System.out.println("[Server/TCP] Client verbunden: " + client.getRemoteSocketAddress());
+        try{
+            ServerSocket serverSocket = new ServerSocket(port);
+            System.out.println("Server auf Port " + port + " gestartet...");
 
-                Scanner serverScanner = new Scanner(new BufferedReader(new InputStreamReader(client.getInputStream())));
-                PrintWriter writer = new PrintWriter(client.getOutputStream());
+            while(true){
+                try{
+                    System.out.println("[Server/TCP] Warte auf eingehende Verbindung...");
+                    Socket client = serverSocket.accept();
+                    System.out.println("[Server/TCP] Client verbunden: " + client.getRemoteSocketAddress());
 
-                if(serverScanner.hasNext()){
-                    System.out.println("[Server/TCP] Empfangen von Client (" + client.getRemoteSocketAddress() + "): " + serverScanner.nextLine());
+                    executor.submit(new ServerHandlerThread(client));
+                } catch (IOException e){
+                    System.err.println("Verbindung zum Client konnte nicht aufgebaut werden oder wurde unerwartet beendet!");
+//                    e.printStackTrace();
                 }
-
-                serverScanner.close();
-                writer.close();
-
-                client.close();
-                System.out.println("[Server/TCP] Verbindung zum Client abgebaut!");
-
-                //Server wartet hier nun wieder auf eine neu eingehende Verbindung
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            System.err.println("Server konnte nicht gestartet werden!");
+
+            if(e instanceof BindException){
+                System.err.println("Es läuft bereits ein Server auf Port " + port + "!");
+            }
+//            e.printStackTrace();
         }
     }
 
