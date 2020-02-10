@@ -3,7 +3,6 @@ package de.dennisadam.eva.chat;
 import de.dennisadam.eva.user.User;
 import de.dennisadam.eva.user.UserStatus;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +12,6 @@ public class Chat {
 
     private ChatStatus userChatStatus0;
     private ChatStatus userChatStatus1;
-
-    private Timestamp timestamp;
 
     private List<Messages> newMessages;
     private List<Messages> oldMessages;
