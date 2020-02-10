@@ -20,39 +20,19 @@ public class Client {
         ){
             System.out.println("[Client] Verbindung zum Server erfolgreich aufgebaut...");
 
-            System.out.println("Warst du schonmal angemeldet? (j/n)");
-
-            if(consoleIn.nextLine().equals("j")){
-                System.out.println("Bitte gib den Benutzernamen ein, den du das letzte Mal verwendet hast: (Achtung: case sensitive)");
-            }
-            else{
-                System.out.println("Unter welchem Namen möchtest du für andere Sichtbar sein?");
-            }
+            System.out.println("Bitte gib deinen Benutzernamen ein: (Achtung: case sensitive)");
 
             writer.println(consoleIn.nextLine());
             writer.flush();
 
-            //Hier bekommen wird als erstes die Liste der verfügbaren Befehle, das erste Mal angezeigt und dass man sich erfolgreich angemeldet hat
-            //STOP ist hier der letzte Eintrag und das STOP-Token, dass daraufhin nix mehr kommt!
-            String line;
-            while(!(line = reader.readLine()).contains("STOP")){
-                System.out.println(line);
-            }
+            Thread daemon = new Thread(new ServerRespondDaemon(reader));
+            daemon.setDaemon(true);
+            daemon.start();
 
-            //Schleife, in der Abwechselnd Befehle gesandt werden und auf die Antwort des Servers gewartet wird
+            //Schleife, in der durchgängig (endlos) auf Eingaben des Nutzers gewartet wird
             while(true){
-                System.out.println("Befehl:");
                 writer.println(consoleIn.nextLine());
                 writer.flush();
-
-                while(!(line = reader.readLine()).contains("STOP")){
-                    System.out.println(line);
-
-                    if(line.contains("abgemeldet!")){
-                        socket.close();
-                        System.exit(0);
-                    }
-                }
             }
 
         } catch (IOException e) {

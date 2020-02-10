@@ -1,18 +1,17 @@
 package de.dennisadam.eva.server;
 
-import de.dennisadam.eva.user.User;
+import de.dennisadam.eva.user.UserList;
 
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    public static List<User> userList;
+    public static UserList userList;
     private static int port;
 
     public static void main(String[] args) {
@@ -26,8 +25,8 @@ public class Server {
             port = Integer.parseInt(args[0]);
         }
 
-        //TODO: Auslesen der Benutzerliste aus JSON-Datei und schreiben in userList
-        userList = new ArrayList<>();
+        //TODO: Auslesen der Benutzerliste aus JSON-Datei und schreiben in userList (eventuell nicht notwendig)
+        userList = new UserList(new ArrayList<>());
 
         //Starten des Servers
         try{
@@ -42,7 +41,7 @@ public class Server {
                     Socket client = serverSocket.accept();
                     System.out.println("[Server/TCP] Client verbunden: " + client.getRemoteSocketAddress());
 
-                    executor.submit(new ServerHandlerThread(client));
+                    executor.submit(new ClientHandler(client));
                 } catch (IOException e){
                     System.err.println("Verbindung zum Client konnte nicht aufgebaut werden oder wurde unerwartet beendet!");
 //                    e.printStackTrace();
@@ -56,15 +55,6 @@ public class Server {
             }
 //            e.printStackTrace();
         }
-    }
-
-    public static User userListContains(String username) {
-        for(User u : userList){
-            if(u.getUsername().equals(username)) {
-                return u;
-            }
-        }
-        return null;
     }
 
 }

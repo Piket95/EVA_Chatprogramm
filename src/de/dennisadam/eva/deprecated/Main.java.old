@@ -38,7 +38,7 @@ public class Main {
         System.out.println("Starting Client...");
         String hostname = "localhost";
 
-        //TODO: Abfrage mit welcher IP verbunden werden soll
+        //TOTDO: Abfrage mit welcher IP verbunden werden soll
 
         Client client = new Client(hostname);
         client.request();
