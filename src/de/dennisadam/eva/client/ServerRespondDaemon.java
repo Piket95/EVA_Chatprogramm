@@ -16,11 +16,11 @@ public class ServerRespondDaemon implements Runnable {
         try{
             String line;
             while((line = reader.readLine()) != null){
-                System.out.println(line);
-
-                if(line.contains("abgemeldet!")){
+                if(line.equals("SHUTDOWN")){
                     System.exit(0);
                 }
+
+                System.out.println(line);
             }
         } catch (IOException e) {
             e.printStackTrace();

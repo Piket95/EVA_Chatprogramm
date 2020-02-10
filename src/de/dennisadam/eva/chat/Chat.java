@@ -9,6 +9,7 @@ import java.util.List;
 public class Chat {
 
     private final User[] MEMBER;
+    private final int ARCHIVE_SIZE = 10;
 
     private ChatStatus userChatStatus0;
     private ChatStatus userChatStatus1;
@@ -42,7 +43,7 @@ public class Chat {
             if(message.getSender() == MEMBER[0]){
                 if( (MEMBER[1].getStatus() == UserStatus.ONLINE) && (this.userChatStatus1 == ChatStatus.LEFT) ){
                     MEMBER[0].getWriter().println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
-                    MEMBER[1].getWriter().println("Sie haben eine neue Nachricht im Chat mit " + MEMBER[0].getUsername() + " erhalten!");
+                    MEMBER[1].getWriter().println("\nSie haben eine neue Nachricht im Chat mit \"" + MEMBER[0].getUsername() + "\" erhalten!");
                     MEMBER[1].getWriter().println("Geben Sie /chat " + MEMBER[0].getUsername() + " ein, um den Chat zu betreten und die Nachricht zu lesen!");
 
                     MEMBER[0].getWriter().flush();
@@ -64,7 +65,7 @@ public class Chat {
 
     //Wenn mehr als 10 Nachrichten im Archiv hinterlegt sind, wird die 1. gelöscht, damit insgesamt nur 10 Nachrichten in der Liste sind
     public void checkArchiveSize(){
-        if (oldMessages.size() > 10) {
+        if (oldMessages.size() > ARCHIVE_SIZE) {
             oldMessages.remove(0);
         }
     }
@@ -113,7 +114,7 @@ public class Chat {
         stringBuilder.append("----------------------Liste der Chat-Befehle---------------------\n");
         stringBuilder.append("/help\t\t\t\t\t\tZeigt die Liste der verfügbaren Befehle (diese hier)\n");
         stringBuilder.append("/archiv\t\t\t\t\t\tZeigt die letzten 10 Nachrichten an\n");
-        stringBuilder.append("/exit\t\t\t\t\t\tVerlasse den aktuellen Chat");
+        stringBuilder.append("/leave\t\t\t\t\t\tVerlasse den aktuellen Chat");
 
         return stringBuilder.toString();
     }

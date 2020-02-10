@@ -20,11 +20,6 @@ public class Client {
         ){
             System.out.println("[Client] Verbindung zum Server erfolgreich aufgebaut...");
 
-            System.out.println("Bitte gib deinen Benutzernamen ein: (Achtung: case sensitive)");
-
-            writer.println(consoleIn.nextLine());
-            writer.flush();
-
             Thread daemon = new Thread(new ServerRespondDaemon(reader));
             daemon.setDaemon(true);
             daemon.start();

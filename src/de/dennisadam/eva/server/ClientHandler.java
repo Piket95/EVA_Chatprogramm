@@ -12,15 +12,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.concurrent.TimeUnit;
 
 public class ClientHandler implements Runnable {
 
     private Socket client;
     private String username;
     private User currentUser;
-
-    private boolean clientConnected;
 
     private PrintWriter writer;
     private BufferedReader reader;
@@ -29,7 +26,6 @@ public class ClientHandler implements Runnable {
     public ClientHandler(Socket client){
         try{
             this.client = client;
-            clientConnected = true;
             this.writer = new PrintWriter(client.getOutputStream());
             this.reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
         } catch (IOException e) {
@@ -40,30 +36,8 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try{
-            //Abfrage, ob username schon in Liste existiert oder dieser komplett neu angelegt werden muss
-            if((line = reader.readLine()) != null){
-                username = line;
-                currentUser = Server.userList.getUserFromList(username);
-
-                if(currentUser == null){
-                    currentUser = new User(username, writer, reader);
-                    Server.userList.add(currentUser);
-                }
-                else {
-                    currentUser.setStatus(UserStatus.ONLINE);
-                    currentUser.setReader(reader);
-                    currentUser.setWriter(writer);
-                }
-
-                System.out.println("[Server/TCP] \"" + username + "\" (" + client.getRemoteSocketAddress() + ") erfolgreich angemeldet!");
-                writer.println("\"" + username + "\" erfolgreich angemeldet!\n");
-            }
-
-            //Gibt eine Liste der aktiven (bereits in der Vergangenheit getätigten) Chats mit anderen Personen
-            currentUser.showChatList();
-
-            writer.println("Mithilfe von /help, bekommen Sie eine Übersicht der verfügbaren Befehle!");
-            writer.flush();
+            //Bitte den Client um Login
+            while (!login());
 
             //Warte auf Befehle
             while((line = reader.readLine()) != null){
@@ -106,6 +80,10 @@ public class ClientHandler implements Runnable {
                             currentUser.deleteActiveChat(chatpartner);
                             break;
                         case "/logout":
+                            logout();
+                            login();
+                            break;
+                        case "/exit":
                             disconnectClient();
                             break;
                         default:
@@ -114,7 +92,7 @@ public class ClientHandler implements Runnable {
                     }
                 }
 
-                if(!clientConnected){
+                if(currentUser.getStatus() == UserStatus.OFFLINE){
                     break;
                 }
             }
@@ -140,7 +118,6 @@ public class ClientHandler implements Runnable {
     }
 
     public void chatting(User chatpartner){
-        //TODO: Chatfunktion implementieren
 
         if(chatpartner == null){
             writer.println("Den angegebenen Benutzer gibt es nicht! Du findest eine Liste mit allen registrierten Benutzern unter /userlist!");
@@ -188,7 +165,7 @@ public class ClientHandler implements Runnable {
 
             try{
                 while((line = reader.readLine()) != null){
-                    if(line.equals("/exit")){
+                    if(line.equals("/leave")){
 
                         if(chat.getMEMBER()[0] == currentUser){
                             chat.setUserChatStatus0(ChatStatus.LEFT);
@@ -235,36 +212,94 @@ public class ClientHandler implements Runnable {
 
     public void printCommandList(){
         writer.println("------------------------Liste der Befehle------------------------");
-        writer.println("/help\t\t\t\t\t\tZeigt die Liste der verfügbaren Befehle (diese hier)");
+        writer.println("/help\t\t\t\t\t\t\tZeigt die Liste der verfügbaren Befehle (diese hier)");
         writer.println("/userlist\t\t\t\t\t\tZeigt eine Liste der verfügbaren Benutzer an");
         writer.println("/chatlist\t\t\t\t\t\tZeigt die Liste deiner aktiven Chats");
         writer.println("/deleteChat <Benutzername>\t\tLöscht den aktiven Chat mit dem angegebenen Benutzer aus der Liste (case sensitive");
-        writer.println("/chat <Benutzername>\t\tStarte einen Chat mit dem angegebenen Benutzer (case sensitive)");
-        writer.println("/logout\t\t\t\t\t\tMeldet dich vom Server ab und trennt die Verbindung!");
+        writer.println("/chat <Benutzername>\t\t\tStarte einen Chat mit dem angegebenen Benutzer (case sensitive)");
+        writer.println("/logout\t\t\t\t\t\t\tMeldet dich vom Server ab");
+        writer.println("/exit\t\t\t\t\t\t\tMeldet dich vom Server ab falls noch nicht geschehen und beendet die Anwendung");
+        writer.println("-----------------------------------------------------------------");
         writer.flush();
+    }
+
+    //TODO: Abfrage ob Login oder Registrieren
+    public boolean login(){
+        try{
+            writer.println("Bitte gib deinen Benutzernamen ein: (Achtung: case sensitive)");
+            writer.flush();
+
+            //Abfrage, ob username schon in Liste existiert oder dieser komplett neu angelegt werden muss
+            String line;
+            if((line = reader.readLine()) != null){
+                username = line;
+                currentUser = Server.userList.getUserFromList(username);
+
+                if(currentUser == null){
+                    currentUser = new User(username, writer, reader);
+                    Server.userList.add(currentUser);
+                }
+                else {
+                    currentUser.setStatus(UserStatus.ONLINE);
+                    currentUser.setReader(reader);
+                    currentUser.setWriter(writer);
+                }
+            }
+
+            if(currentUser.getStatus() == UserStatus.ONLINE){
+                System.out.println("[Server/TCP] \"" + username + "\" (" + client.getRemoteSocketAddress() + ") erfolgreich angemeldet!");
+                writer.println("\"" + username + "\" erfolgreich angemeldet!\n");
+                writer.flush();
+
+                //Gibt eine Liste der aktiven (bereits in der Vergangenheit getätigten) Chats mit anderen Personen
+                currentUser.showChatList();
+
+                writer.println("Mithilfe von /help, bekommen Sie eine Übersicht der verfügbaren Befehle!");
+                writer.flush();
+
+                return true;
+            }else{
+                System.out.println("[Server/TCP] Anmeldung von \"" + username + "\" (" + client.getRemoteSocketAddress() + ") fehlgeschlagen!");
+                writer.println("Anmeldung fehlgeschlagen!");
+                writer.flush();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public void logout(){
+
+        System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" meldet sich nun ab!");
+        writer.println("Sie werden nun vom Server abgemeldet!");
+        writer.flush();
+
+        currentUser.setStatus(UserStatus.OFFLINE);
     }
 
     public void disconnectClient(){
 
         try {
-            System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" meldet sich nun ab!");
-            writer.println("Sie werden nun in wenigen Sekunden vom Server abgemeldet!");
-            writer.flush();
-            TimeUnit.SECONDS.sleep(3);
 
-            currentUser.setStatus(UserStatus.OFFLINE);
+            if(currentUser.getStatus() == UserStatus.ONLINE){
+                logout();
+            }
+
+            writer.println("Die Verbindung zum Server wird nun getrennt!");
+            writer.println("SHUTDOWN");
+            writer.flush();
+
             currentUser.setWriter(null);
             currentUser.setReader(null);
-            clientConnected = false;
 
+            writer.close();
+            reader.close();
             client.close();
-        } catch (IOException | InterruptedException e) {
-            if(e instanceof InterruptedException){
-                Thread.currentThread().interrupt();
-            }
-            else {
-                e.printStackTrace();
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         System.out.println("[Server/TCP] Verbindung zum Client abgebaut!");
