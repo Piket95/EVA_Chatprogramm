@@ -8,12 +8,24 @@ import java.util.Scanner;
 public class Client {
 
     public static void main(String[] args) {
-        String hostname = "localhost";
+
+        int PORT = 1608;
+        String HOSTNAME = "localhost";
+
+        //TODO: Abfrage ob Port wirklich Port Format hat und keine Buchstaben beinhaltet und Hostname eine IP oder hostname ist
+        //Abfragen der Programmargumente und setzen des Ports
+        if(args.length != 2){
+            System.err.println("Usage: java -cp Server <ServerIP/Hostname> <listening port>");
+            System.exit(0);
+        } else {
+            HOSTNAME = args[0];
+            PORT = Integer.parseInt(args[1]);
+        }
 
         System.out.println("[Client] Verbindung wird aufgebaut...");
 
         try(
-            Socket socket = new Socket(hostname, 1608);
+            Socket socket = new Socket(HOSTNAME, PORT);
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
             Scanner consoleIn = new Scanner(System.in);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))

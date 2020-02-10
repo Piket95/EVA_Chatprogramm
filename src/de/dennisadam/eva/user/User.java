@@ -41,6 +41,7 @@ public class User {
     }
 
     public void showChatList(){
+        //TODO: Anzeige ob Chatpartner auch gerade online ist
         writer.println("Liste der aktiven Chats: ");
 
         if(this.getChatliste().size() != 0){

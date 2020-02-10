@@ -17,6 +17,7 @@ public class Server {
     public static void main(String[] args) {
         ExecutorService executor = Executors.newFixedThreadPool(20);
 
+        //TODO: Abfrage ob Port wirklich Port Format hat
         //Abfragen der Programmargumente und setzen des Ports
         if(args.length == 0){
             System.err.println("Usage: java -cp Server <listening port>");

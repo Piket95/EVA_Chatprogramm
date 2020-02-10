@@ -77,7 +77,9 @@ public class ClientHandler implements Runnable {
                         case "/deleteChat":
                             User chatpartner = Server.userList.getUserFromList(line.substring(line.lastIndexOf(" ") + 1));
 
+                            //Der Chat wird für beide Gesprächspartner gelöscht!
                             currentUser.deleteActiveChat(chatpartner);
+                            chatpartner.deleteActiveChat(currentUser);
                             break;
                         case "/logout":
                             logout();
