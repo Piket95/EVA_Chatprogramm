@@ -1,7 +1,7 @@
-package de.dennisadam.eva.chat;
+package de.dennisadam.eva.server.chat;
 
-import de.dennisadam.eva.user.User;
-import de.dennisadam.eva.user.UserStatus;
+import de.dennisadam.eva.server.user.User;
+import de.dennisadam.eva.server.user.UserStatus;
 
 import java.util.ArrayList;
 import java.util.List;

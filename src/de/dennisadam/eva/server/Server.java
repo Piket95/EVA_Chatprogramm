@@ -1,6 +1,6 @@
 package de.dennisadam.eva.server;
 
-import de.dennisadam.eva.user.UserList;
+import de.dennisadam.eva.server.user.UserList;
 
 import java.io.IOException;
 import java.net.BindException;

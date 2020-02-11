@@ -1,10 +1,10 @@
 package de.dennisadam.eva.server;
 
-import de.dennisadam.eva.chat.Chat;
-import de.dennisadam.eva.chat.ChatStatus;
-import de.dennisadam.eva.chat.Messages;
-import de.dennisadam.eva.user.User;
-import de.dennisadam.eva.user.UserStatus;
+import de.dennisadam.eva.server.chat.Chat;
+import de.dennisadam.eva.server.chat.ChatStatus;
+import de.dennisadam.eva.server.chat.Messages;
+import de.dennisadam.eva.server.user.User;
+import de.dennisadam.eva.server.user.UserStatus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,6 +35,8 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
+
+        //TODO: Vor und nach jedem Output an Client eine leere Zeile (\n) mitsenden (Übersicht)
         try{
             //Bitte den Client um Login
             while (!login());

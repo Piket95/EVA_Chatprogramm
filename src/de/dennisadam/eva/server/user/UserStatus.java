@@ -1,4 +1,4 @@
-package de.dennisadam.eva.user;
+package de.dennisadam.eva.server.user;
 
 public enum UserStatus {
     OFFLINE, ONLINE

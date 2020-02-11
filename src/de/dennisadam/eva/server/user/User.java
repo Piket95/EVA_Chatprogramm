@@ -1,6 +1,6 @@
-package de.dennisadam.eva.user;
+package de.dennisadam.eva.server.user;
 
-import de.dennisadam.eva.chat.Chat;
+import de.dennisadam.eva.server.chat.Chat;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;

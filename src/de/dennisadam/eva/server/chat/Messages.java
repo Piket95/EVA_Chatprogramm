@@ -1,6 +1,6 @@
-package de.dennisadam.eva.chat;
+package de.dennisadam.eva.server.chat;
 
-import de.dennisadam.eva.user.User;
+import de.dennisadam.eva.server.user.User;
 
 import java.sql.Timestamp;
 
