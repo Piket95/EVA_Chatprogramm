@@ -7,23 +7,23 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Server {
     public static UserList userList;
     private static int port;
 
     public static void main(String[] args) {
-        ExecutorService executor = Executors.newFixedThreadPool(20);
-
-        //TODO: Abfrage ob Port wirklich Port Format hat
         //Abfragen der Programmargumente und setzen des Ports
         if(args.length == 0){
-            System.err.println("Usage: java -cp Server <listening port>");
+            System.err.println("Usage: java -jar Server.jar <listening port>");
             System.exit(0);
         } else {
-            port = Integer.parseInt(args[0]);
+            try{
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e){
+                System.err.println("Das mitgelieferte Argument ist keine Zahl...");
+                System.exit(0);
+            }
         }
 
         //TODO: Auslesen der Benutzerliste aus JSON-Datei und schreiben in userList (eventuell nicht notwendig)
@@ -33,19 +33,20 @@ public class Server {
         try{
             ServerSocket serverSocket = new ServerSocket(port);
             System.out.println("Server erfolgreich gestartet!");
-            System.out.println("Der Server ist nun auf dem Port \"" + port + "\" erreichbar...");
+            System.out.println("Der Server ist nun auf dem Port \"" + serverSocket.getLocalPort() + "\" erreichbar...");
 
             //Listening starten (Server hört/wartet auf Anfragen)
             while(true){
                 try{
                     System.out.println("[Server/TCP] Warte auf eingehende Verbindung...");
                     Socket client = serverSocket.accept();
-                    System.out.println("[Server/TCP] Client verbunden: " + client.getRemoteSocketAddress());
+                    System.out.println("[Server/TCP] Client verbunden: " + client.getInetAddress().toString().substring(client.getInetAddress().toString().lastIndexOf("/") + 1));
 
-                    executor.submit(new ClientHandler(client));
+                    new Thread(new ClientHandler(client)).start();
                 } catch (IOException e){
                     System.err.println("Verbindung zum Client konnte nicht aufgebaut werden oder wurde unerwartet beendet!");
-//                    e.printStackTrace();
+                    System.err.println("Grund:");
+                    e.getMessage();
                 }
             }
         } catch (IOException e) {
@@ -54,7 +55,11 @@ public class Server {
             if(e instanceof BindException){
                 System.err.println("Es läuft bereits ein Server auf Port " + port + "!");
             }
-//            e.printStackTrace();
+            else{
+                System.err.println("Grund:");
+                System.err.println(e.getMessage());
+//                e.printStackTrace();
+            }
         }
     }
 

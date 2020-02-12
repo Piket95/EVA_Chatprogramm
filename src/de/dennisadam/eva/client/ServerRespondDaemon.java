@@ -2,6 +2,7 @@ package de.dennisadam.eva.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketException;
 
 public class ServerRespondDaemon implements Runnable {
 
@@ -16,14 +17,21 @@ public class ServerRespondDaemon implements Runnable {
         try{
             String line;
             while((line = reader.readLine()) != null){
-                if(line.equals("SHUTDOWN")){
+                if(line.equals("EXIT")){
                     System.exit(0);
                 }
 
                 System.out.println(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if(e instanceof SocketException){
+                //TODO: Retry implementieren?
+                System.err.println("Die Verbindung zum Server wurde unerwartet beendet...");
+                System.exit(0);
+            }
+            else {
+                e.printStackTrace();
+            }
         }
     }
 }
