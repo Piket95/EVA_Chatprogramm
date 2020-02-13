@@ -18,6 +18,7 @@ public class ServerRespondDaemon implements Runnable {
             String line;
             while((line = reader.readLine()) != null){
                 if(line.equals("EXIT")){
+                    System.out.println("Programm wird beendet...");
                     System.exit(0);
                 }
 

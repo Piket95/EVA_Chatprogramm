@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Client {
@@ -36,10 +37,10 @@ public class Client {
         System.out.println("[Client] Verbindung zum Server \""+ HOSTNAME + ":" + PORT + "\" wird aufgebaut...");
 
         try(
-            Socket socket = new Socket(HOSTNAME, PORT);
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
-            Scanner consoleIn = new Scanner(System.in);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+                Socket socket = new Socket(HOSTNAME, PORT);
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+                Scanner consoleIn = new Scanner(System.in);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         ){
             System.out.println("[Client] Verbindung zum Server (" + socket.getInetAddress().toString().substring(socket.getInetAddress().toString().lastIndexOf("/") + 1) + ":" +  socket.getPort() + ") erfolgreich aufgebaut...");
 

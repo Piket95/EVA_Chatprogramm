@@ -9,7 +9,7 @@ import java.util.List;
 
 public class User {
     private String username;
-    //TODO: Passwort hinzufügen (mit Hashing)
+    private byte[] password;
     private UserStatus status;
 
     private PrintWriter writer;
@@ -17,17 +17,14 @@ public class User {
 
     private List<Chat> chatliste;
 
-    public User(String username, PrintWriter writer, BufferedReader reader) {
+    public User(String username, byte[] password, PrintWriter writer, BufferedReader reader) {
         this.username = username;
+        this.password = password;
         this.status = UserStatus.ONLINE;
         this.reader = reader;
         this.writer = writer;
 
         this.chatliste = new ArrayList<>();
-    }
-
-    public List<Chat> getChatliste() {
-        return chatliste;
     }
 
     public Chat chatExists(final User[] MEMBER){
@@ -41,19 +38,24 @@ public class User {
     }
 
     public void showChatList(){
-        //TODO: Anzeige ob Chatpartner auch gerade online ist
         writer.println();
         writer.println("---------------------Liste der aktiven Chats---------------------");
 
         if(this.getChatliste().size() != 0){
             for(Chat chat : this.getChatliste()){
-                String preset;
+                String preset = "- ";
 
                 if(chat.getMEMBER()[0] != this){
-                    preset = "- " + chat.getMEMBER()[0].getUsername();
+                    if(chat.getMEMBER()[0].getStatus() == UserStatus.ONLINE){
+                        preset = preset + "(*)";
+                    }
+                    preset = preset + chat.getMEMBER()[0].getUsername();
                 }
                 else{
-                    preset = "- " + chat.getMEMBER()[1].getUsername();
+                    if(chat.getMEMBER()[1].getStatus() == UserStatus.ONLINE){
+                        preset = preset + "(*)";
+                    }
+                    preset = preset + chat.getMEMBER()[1].getUsername();
                 }
 
                 int newMessages = chat.countNewMessages(this);
@@ -118,5 +120,13 @@ public class User {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public List<Chat> getChatliste() {
+        return chatliste;
+    }
+
+    public byte[] getPassword() {
+        return password;
     }
 }
