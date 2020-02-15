@@ -30,7 +30,7 @@ public class ClientHandler implements Runnable {
 
             this.client = client;
             this.writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8));
-            this.reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            this.reader = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }

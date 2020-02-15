@@ -41,7 +41,7 @@ public class Client {
                 Socket socket = new Socket(HOSTNAME, PORT);
                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
                 Scanner consoleIn = new Scanner(System.in);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))
         ){
             System.out.println("[Client] Verbindung zum Server (" + socket.getInetAddress().toString().substring(socket.getInetAddress().toString().lastIndexOf("/") + 1) + ":" +  socket.getPort() + ") erfolgreich aufgebaut...");
 
