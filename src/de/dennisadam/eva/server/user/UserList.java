@@ -4,7 +4,7 @@ import java.util.*;
 
 public class UserList {
 
-    private List<User> users;
+    private final List<User> users;
 
     public UserList(List<User> users) {
         this.users = users;
@@ -25,9 +25,5 @@ public class UserList {
 
     public List<User> getUserList() {
         return users;
-    }
-
-    public int size(){
-        return users.size();
     }
 }

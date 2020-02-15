@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Client {
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
 
         int PORT = 1608;
@@ -29,7 +30,7 @@ public class Client {
             try{
                 PORT = Integer.parseInt(args[1]);
             } catch (NumberFormatException e){
-                System.err.println("Das mitgelieferte Portargument (Argument 2) ist keine Zahl!");
+                System.err.println("Das mitgelieferte Port Argument (Argument 2) ist keine Zahl!");
                 System.exit(0);
             }
         }

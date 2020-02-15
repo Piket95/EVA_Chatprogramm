@@ -9,10 +9,10 @@ import java.util.List;
 
 public class ChatMember {
 
-    private User user;
+    private final User user;
     private ChatStatus status;
 
-    private List<Message> newMessages;
+    private final List<Message> newMessages;
 
     public ChatMember(User user) {
         this.user = user;
@@ -48,10 +48,6 @@ public class ChatMember {
 
     public synchronized void addNewMessage(Message message){
         newMessages.add(message);
-    }
-
-    public synchronized void removeNewMessage(Message message){
-        newMessages.remove(message);
     }
 
     public User getUser() {

@@ -12,6 +12,7 @@ public class Server {
     public static UserList userList;
     private static int port;
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
         //Abfragen der Programmargumente und setzen des Ports
         if(args.length == 0){

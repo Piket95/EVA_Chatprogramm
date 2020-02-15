@@ -3,26 +3,24 @@ package de.dennisadam.eva.server.user;
 import de.dennisadam.eva.server.chat.Chat;
 import de.dennisadam.eva.server.chat.ChatMember;
 
-import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class User {
-    private String username;
-    private byte[] password;
+    private final String username;
+    private final byte[] password;
     private UserStatus status;
 
     private PrintWriter writer;
-    private BufferedReader reader;
 
-    private List<Chat> chatliste;
+    private final List<Chat> chatliste;
 
-    public User(String username, byte[] password, PrintWriter writer, BufferedReader reader) {
+    public User(String username, byte[] password, PrintWriter writer) {
         this.username = username;
         this.password = password;
         this.status = UserStatus.ONLINE;
-        this.reader = reader;
         this.writer = writer;
 
         this.chatliste = new ArrayList<>();
@@ -88,11 +86,14 @@ public class User {
     }
 
     public void deleteActiveChat(User chatpartner){
-        for(Chat chat : chatliste){
+        Iterator<Chat> iter = chatliste.iterator();
+        Chat chat;
 
+        while(iter.hasNext()){
+            chat = iter.next();
             for(ChatMember chatMember : chat.getCHATMEMBER()){
                 if(chatMember.getUser() == chatpartner){
-                    chatliste.remove(chat);
+                    iter.remove();
                     chatpartner.chatliste.remove(chat);
                 }
             }
@@ -107,20 +108,8 @@ public class User {
         this.writer = writer;
     }
 
-    public BufferedReader getReader() {
-        return reader;
-    }
-
-    public void setReader(BufferedReader reader) {
-        this.reader = reader;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public UserStatus getStatus() {

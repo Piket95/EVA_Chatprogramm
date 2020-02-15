@@ -6,9 +6,9 @@ import java.sql.Timestamp;
 
 public class Message {
 
-    private User sender;
-    private Timestamp timestamp;
-    private String message;
+    private final User sender;
+    private final Timestamp timestamp;
+    private final String message;
 
     public Message(User sender, String message) {
         this.sender = sender;

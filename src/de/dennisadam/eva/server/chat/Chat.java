@@ -9,10 +9,12 @@ import java.util.List;
 
 public class Chat {
 
+    @SuppressWarnings("SpellCheckingInspection")
     private final List<ChatMember> CHATMEMBER;
+    @SuppressWarnings("FieldCanBeLocal")
     private final int ARCHIVE_SIZE = 10;
 
-    private List<Message> archive;
+    private final List<Message> archive;
 
     public Chat(User user1, User user2) {
         this.CHATMEMBER = new ArrayList<>();
@@ -78,6 +80,7 @@ public class Chat {
         archive.add(message);
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public List<ChatMember> getCHATMEMBER() {
         return CHATMEMBER;
     }
@@ -123,13 +126,12 @@ public class Chat {
             if(disconnect){
                 partner.getUser().getWriter().println();
                 partner.getUser().getWriter().println("\"" + leavingUser.getUser().getUsername() + "\" hat die Verbindung zum Server verloren!");
-                partner.getUser().getWriter().flush();
             }
             else{
                 partner.getUser().getWriter().println();
                 partner.getUser().getWriter().println("\"" + leavingUser.getUser().getUsername() + "\" hat den Chat verlassen!");
-                partner.getUser().getWriter().flush();
             }
+            partner.getUser().getWriter().flush();
         }
     }
 }

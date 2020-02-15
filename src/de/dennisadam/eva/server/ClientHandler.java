@@ -43,17 +43,16 @@ public class ClientHandler implements Runnable {
 
                 //Einloggen, Registrieren, Exit -----------------------------------------------------------------------------------------------
                 while(currentUser == null){
-                    User checkUser = null;
+                    User checkUser;
 
                     writer.println();
-                    writer.println("Was möchstest du tun? (Zahl eingeben)");
+                    writer.println("Was möchtest du tun? (Zahl eingeben)");
                     writer.println("(1) Einloggen");
                     writer.println("(2) Registrieren");
                     writer.println("(3) Programm beenden");
                     writer.flush();
 
-                    //Prüfen, welche Option gewält wurde
-
+                    //Prüfen, welche Option gewählt wurde
                     if((line = reader.readLine()) != null){
                         try{
                             int option = Integer.parseInt(line);
@@ -89,7 +88,6 @@ public class ClientHandler implements Runnable {
 
                                                 if (checkUser != null) {
                                                     currentUser = checkUser;
-                                                    currentUser.setReader(reader);
                                                     currentUser.setWriter(writer);
                                                     currentUser.setStatus(UserStatus.ONLINE);
 
@@ -184,7 +182,7 @@ public class ClientHandler implements Runnable {
                                         }
                                     }
                                 }
-                                else if (option == 3) { //Beenden
+                                else { //Beenden
                                     disconnectClient();
                                     break;
                                 }
@@ -400,6 +398,13 @@ public class ClientHandler implements Runnable {
 
             return null;
         }
+        else if(loginUser.getStatus() == UserStatus.ONLINE){
+            writer.println();
+            writer.println("Der angegebene User ist bereits angemeldet!");
+            writer.flush();
+
+            return null;
+        }
 
         hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
@@ -417,7 +422,7 @@ public class ClientHandler implements Runnable {
         if(regUser == null){
             byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
-            return new User(username, hashedPassword, writer, reader);
+            return new User(username, hashedPassword, writer);
         }
         else{
             writer.println();
@@ -437,7 +442,6 @@ public class ClientHandler implements Runnable {
         writer.flush();
 
         currentUser.setWriter(null);
-        currentUser.setReader(null);
         currentUser.setStatus(UserStatus.OFFLINE);
         currentUser = null;
     }

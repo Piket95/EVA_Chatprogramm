@@ -2,14 +2,13 @@ package de.dennisadam.eva.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.Socket;
 import java.net.SocketException;
 
 public class ServerRespondDaemon implements Runnable {
 
-    BufferedReader reader;
-    String hostname;
-    int port;
+    final BufferedReader reader;
+    final String hostname;
+    final int port;
 
     public ServerRespondDaemon(String hostname, int port, BufferedReader reader) {
         this.hostname = hostname;
@@ -35,7 +34,6 @@ public class ServerRespondDaemon implements Runnable {
             System.exit(0);
         } catch (IOException e) {
             if(e instanceof SocketException){
-                //TODO: Retry implementieren?
                 System.err.println("Die Verbindung zum Server wurde unerwartet beendet...");
                 System.exit(0);
             }
