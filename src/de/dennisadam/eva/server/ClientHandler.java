@@ -2,6 +2,7 @@ package de.dennisadam.eva.server;
 
 import de.dennisadam.eva.server.chat.Chat;
 import de.dennisadam.eva.server.chat.ChatMember;
+import de.dennisadam.eva.server.chat.ChatStatus;
 import de.dennisadam.eva.server.chat.Message;
 import de.dennisadam.eva.server.user.User;
 import de.dennisadam.eva.server.user.UserStatus;
@@ -205,21 +206,25 @@ public class ClientHandler implements Runnable {
                 //Befehle erwarten ---------------------------------------------------------------------------------------------------------------
                 while(!isTerminated){
                     if((line = reader.readLine()) != null){
-                        if(line.startsWith("/chat ") && !line.equals("/chatlist")){
+                        if(line.equals("EXITCHAT")){
+                            break;
+                        }
+                        else if(line.startsWith("/chat ") && !line.equals("/chatlist")){
                             User chatpartner = Server.userList.getUserFromList(line.substring(line.lastIndexOf(" ") + 1));
                             startChat(chatpartner);
                         }
                         else if(line.startsWith("/deleteChat ")){
                             User chatpartner = Server.userList.getUserFromList(line.substring(line.lastIndexOf(" ") + 1));
 
-                            //Der Chat wird für beide Gesprächspartner gelöscht!
-                            currentUser.deleteActiveChat(chatpartner);
-                            chatpartner.deleteActiveChat(currentUser);
-
-                            writer.println();
-                            writer.println("Chat mit \"" + chatpartner.getUsername() + "\" wurde erfolgreich vom Server gelöscht!");
-                            writer.flush();
-                            break;
+                            if(chatpartner != null){
+                                //Der Chat wird für beide Gesprächspartner gelöscht!
+                                currentUser.deleteActiveChat(currentUser, chatpartner);
+                            }
+                            else{
+                                writer.println();
+                                writer.println("Der angegebene Nutzer existiert nicht!");
+                                writer.flush();
+                            }
                         }
                         else if(line.equals("/logout")){
                             logout();
@@ -288,17 +293,8 @@ public class ClientHandler implements Runnable {
                 chatpartner.getChatliste().add(chat);
             }
 
-            ChatMember currentMember;
-            ChatMember partner;
-
-            if(chat.getCHATMEMBER().get(0).getUser() == currentUser){
-                currentMember = chat.getCHATMEMBER().get(0);
-                partner = chat.getCHATMEMBER().get(1);
-            }
-            else{
-                currentMember = chat.getCHATMEMBER().get(1);
-                partner = chat.getCHATMEMBER().get(0);
-            }
+            ChatMember currentMember = chat.getChatMemberByUser(currentUser);
+            ChatMember partner = chat.getChatMemberByUser(chatpartner);
 
             //Starte Chat
             chat.joinChat(currentMember, partner);
@@ -311,6 +307,12 @@ public class ClientHandler implements Runnable {
             try{
                 //Endlos warten auf Input
                 while((line = reader.readLine()) != null){
+
+                    //Prüfen ob aktueller Nutzer aus Chat rausgeschmissen wurde
+                    if(currentMember.getStatus() == ChatStatus.LEFT){
+                        break;
+                    }
+
                     //Commands
                     if(line.startsWith("/")){
                         if(line.equals("/leave")){
@@ -384,6 +386,21 @@ public class ClientHandler implements Runnable {
     }
 
     public User login(String username, String password) throws NoSuchAlgorithmException {
+
+        if(username.equals("")){
+            writer.println();
+            writer.println("Bitte gibt einen Benutzernamen an!");
+            writer.flush();
+            return null;
+        }
+
+        if(password.equals("")){
+            writer.println();
+            writer.println("Bitte gib ein Passwort an!");
+            writer.flush();
+            return null;
+        }
+
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         User loginUser;
         byte[] hashedPassword;
@@ -416,6 +433,20 @@ public class ClientHandler implements Runnable {
     }
 
     public User register(String username, String password) throws NoSuchAlgorithmException {
+        if(username.equals("")){
+            writer.println();
+            writer.println("Bitte gibt einen Benutzernamen an!");
+            writer.flush();
+            return null;
+        }
+
+        if(password.equals("")){
+            writer.println();
+            writer.println("Bitte gib ein Passwort an!");
+            writer.flush();
+            return null;
+        }
+
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         User regUser = Server.userList.getUserFromList(username);
 

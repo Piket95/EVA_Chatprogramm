@@ -45,7 +45,7 @@ public class Client {
         ){
             System.out.println("[Client] Verbindung zum Server (" + socket.getInetAddress().toString().substring(socket.getInetAddress().toString().lastIndexOf("/") + 1) + ":" +  socket.getPort() + ") erfolgreich aufgebaut...");
 
-            Thread daemon = new Thread(new ServerRespondDaemon(HOSTNAME, PORT, reader));
+            Thread daemon = new Thread(new ServerRespondDaemon(HOSTNAME, PORT, reader, writer));
             daemon.setDaemon(true);
             daemon.start();
 

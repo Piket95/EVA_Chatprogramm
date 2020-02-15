@@ -80,9 +80,26 @@ public class Chat {
         archive.add(message);
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
-    public List<ChatMember> getCHATMEMBER() {
-        return CHATMEMBER;
+    public ChatMember getChatMemberByUser(User user){
+        for(ChatMember member : CHATMEMBER){
+            if(member.getUser() == user){
+                return member;
+            }
+        }
+
+        return null;
+    }
+
+    public ChatMember getChatPartnerOf(User currentUser){
+        if(CHATMEMBER.get(0).getUser() == currentUser){
+            return CHATMEMBER.get(1);
+        }
+        else if(CHATMEMBER.get(1).getUser() == currentUser){
+            return CHATMEMBER.get(0);
+        }
+        else{
+            return null;
+        }
     }
 
     public void printCommandList(PrintWriter writer){
