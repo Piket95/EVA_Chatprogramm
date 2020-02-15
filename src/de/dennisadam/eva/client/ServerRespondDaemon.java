@@ -2,13 +2,18 @@ package de.dennisadam.eva.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketException;
 
 public class ServerRespondDaemon implements Runnable {
 
     BufferedReader reader;
+    String hostname;
+    int port;
 
-    public ServerRespondDaemon(BufferedReader reader) {
+    public ServerRespondDaemon(String hostname, int port, BufferedReader reader) {
+        this.hostname = hostname;
+        this.port = port;
         this.reader = reader;
     }
 
@@ -24,6 +29,10 @@ public class ServerRespondDaemon implements Runnable {
 
                 System.out.println(line);
             }
+
+            System.err.println("[Client] Verbindung zum Server \"" + hostname + ":" + port + "\" verloren...");
+            System.out.println("Programm wird beendet...");
+            System.exit(0);
         } catch (IOException e) {
             if(e instanceof SocketException){
                 //TODO: Retry implementieren?

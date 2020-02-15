@@ -1,7 +1,8 @@
 package de.dennisadam.eva.server;
 
 import de.dennisadam.eva.server.chat.Chat;
-import de.dennisadam.eva.server.chat.Messages;
+import de.dennisadam.eva.server.chat.ChatMember;
+import de.dennisadam.eva.server.chat.Message;
 import de.dennisadam.eva.server.user.User;
 import de.dennisadam.eva.server.user.UserStatus;
 
@@ -90,13 +91,14 @@ public class ClientHandler implements Runnable {
                                                     currentUser = checkUser;
                                                     currentUser.setReader(reader);
                                                     currentUser.setWriter(writer);
+                                                    currentUser.setStatus(UserStatus.ONLINE);
 
                                                     writer.println();
                                                     writer.println("Du hast dich erfolgreich unter dem Benutzernamen " + currentUser.getUsername() + " angemeldet!");
                                                     writer.flush();
 
                                                     //Anzeige der Liste mit den aktiven Chats dieses Users
-                                                    currentUser.showChatList();
+                                                    currentUser.printChatList();
 
                                                     writer.println();
                                                     writer.println("Mithilfe von /help, bekommst du eine Übersicht aller verfügbaren Befehle!");
@@ -155,7 +157,7 @@ public class ClientHandler implements Runnable {
                                                                 writer.flush();
 
                                                                 //Anzeige der Liste mit den aktiven Chats dieses Users
-                                                                currentUser.showChatList();
+                                                                currentUser.printChatList();
 
                                                                 writer.println();
                                                                 writer.println("Mithilfe von /help, bekommst du eine Übersicht aller verfügbaren Befehle!");
@@ -234,7 +236,7 @@ public class ClientHandler implements Runnable {
                                     printUserList();
                                     break;
                                 case "/chatlist":
-                                    currentUser.showChatList();
+                                    currentUser.printChatList();
                                     break;
                                 case "/exit":
                                     disconnectClient();
@@ -279,72 +281,71 @@ public class ClientHandler implements Runnable {
             writer.flush();
         }
         else{
-            //Starte Chat
-            Chat chat = currentUser.chatExists(new User[]{currentUser, chatpartner});
+            //Checke ob Chat bereits existiert oder nicht
+            Chat chat = currentUser.chatExists(currentUser, chatpartner);
 
-            if(chat == null){
+            if (chat == null) {
                 chat = new Chat(currentUser, chatpartner);
-                currentUser.addActiveChat(chat);
-                chatpartner.addActiveChat(chat);
+                currentUser.getChatliste().add(chat);
+                chatpartner.getChatliste().add(chat);
             }
 
-            writer.println();
-            writer.println("Chat mit \"" + chatpartner.getUsername() + "\" gestartet!");
-            chat.joinChat(currentUser);
+            ChatMember currentMember;
+            ChatMember partner;
 
-            writer.println();
-            if(chat.countNewMessages(currentUser) != 0){
-                writer.println("-----------------Neue Nachrichten in Abwesenheit-----------------");
-
-                for(Messages messages : chat.getNewMessages()){
-                    writer.println("[" + messages.getTimestamp() + "] " + messages.getSender().getUsername() + ": " + messages.getMessage());
-                }
-
-                writer.println("-----------------------------------------------------------------");
+            if(chat.getCHATMEMBER().get(0).getUser() == currentUser){
+                currentMember = chat.getCHATMEMBER().get(0);
+                partner = chat.getCHATMEMBER().get(1);
             }
-            writer.println("Mithilfe von /help bekommst du eine Liste mit Befehlen, die während des Chats zur Verfügung stehen!");
+            else{
+                currentMember = chat.getCHATMEMBER().get(1);
+                partner = chat.getCHATMEMBER().get(0);
+            }
+
+            //Starte Chat
+            chat.joinChat(currentMember, partner);
+            currentMember.printNewMessages(chat);
+
+            writer.println();
+            writer.println("Mithilfe von /help, bekommst du eine Übersicht aller verfügbaren Befehle!");
             writer.flush();
 
             try{
+                //Endlos warten auf Input
                 while((line = reader.readLine()) != null){
-
-                    if(line.contains("/leave")){
-                        //TODO: auch möglich, wenn Gesprächspartner noch im Chat ist
-                        chat.leaveChat(currentUser);
-                        break;
-                    }
-                    else if(line.contains("/")){
-                        switch (line){
-                            case "/help":
-                                chat.getCommandList(writer);
-                                break;
-                            case "/archiv":
-                                chat.getArchiv(writer);
-                                break;
-                            default:
-                                writer.println();
-                                writer.println("Der Befehl existiert nicht! Vielleicht hast du dich vertippt?");
-                                writer.flush();
+                    //Commands
+                    if(line.startsWith("/")){
+                        if(line.equals("/leave")){
+                            chat.leaveChat(currentMember, partner);
+                            break;
+                        }
+                        else{
+                            switch (line) {
+                                case "/help":
+                                    chat.printCommandList(writer);
+                                    break;
+                                case "/archiv":
+                                    chat.printArchive(writer);
+                                    break;
+                                default:
+                                    writer.println();
+                                    writer.println("Der Befehl existiert nicht! Vielleicht hast du dich vertippt?");
+                                    writer.flush();
+                            }
                         }
                     }
                     else{
-                        chat.sendMessage(new Messages(currentUser, line));
+                        if(!line.equals("")){
+                            chat.sendMessage(partner, new Message(currentUser, line));
+                        }
                     }
                 }
-            } catch (IOException e) {
-                if(e instanceof SocketException){
-                    chat.userDisconnectError(currentUser);
-                    throw e;
-                }
-                else{
-                    e.printStackTrace();
-                }
-            }
-            finally{
-                writer.println("Du hast den Chat verlassen!");
-                writer.flush();
+            } catch (IOException e){
+                chat.leaveChat(currentMember, partner, true);
+                throw e;
             }
 
+            //TODO: Client shutdown???
         }
     }
 
@@ -429,7 +430,7 @@ public class ClientHandler implements Runnable {
 
     public void logout(){
 
-        System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" meldet sich nun ab!");
+        System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" hat sich abgemeldet!");
 
         writer.println();
         writer.println("Sie werden nun vom Server abgemeldet!");

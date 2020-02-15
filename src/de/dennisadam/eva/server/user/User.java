@@ -1,6 +1,7 @@
 package de.dennisadam.eva.server.user;
 
 import de.dennisadam.eva.server.chat.Chat;
+import de.dennisadam.eva.server.chat.ChatMember;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -27,9 +28,12 @@ public class User {
         this.chatliste = new ArrayList<>();
     }
 
-    public Chat chatExists(final User[] MEMBER){
+    public Chat chatExists(User user1, User user2){
         for(Chat chat : this.chatliste){
-            if( ( (chat.getMEMBER()[0] == MEMBER[0]) && (chat.getMEMBER()[1] == MEMBER[1]) ) || ( (chat.getMEMBER()[0] == MEMBER[1]) && (chat.getMEMBER()[1] == MEMBER[0]) ) ){
+            User member1 = chat.getCHATMEMBER().get(0).getUser();
+            User member2 = chat.getCHATMEMBER().get(1).getUser();
+
+            if( ((user1 == member1) && (user2 == member2)) || ((user1 == member2) && (user2 == member1)) ){
                 return chat;
             }
         }
@@ -37,7 +41,7 @@ public class User {
         return null;
     }
 
-    public void showChatList(){
+    public void printChatList(){
         writer.println();
         writer.println("---------------------Liste der aktiven Chats---------------------");
 
@@ -45,20 +49,24 @@ public class User {
             for(Chat chat : this.getChatliste()){
                 String preset = "- ";
 
-                if(chat.getMEMBER()[0] != this){
-                    if(chat.getMEMBER()[0].getStatus() == UserStatus.ONLINE){
-                        preset = preset + "(*)";
-                    }
-                    preset = preset + chat.getMEMBER()[0].getUsername();
+                ChatMember thisMember;
+                ChatMember partner;
+                if(chat.getCHATMEMBER().get(0).getUser() == this){
+                    thisMember = chat.getCHATMEMBER().get(0);
+                    partner = chat.getCHATMEMBER().get(1);
                 }
                 else{
-                    if(chat.getMEMBER()[1].getStatus() == UserStatus.ONLINE){
-                        preset = preset + "(*)";
-                    }
-                    preset = preset + chat.getMEMBER()[1].getUsername();
+                    thisMember = chat.getCHATMEMBER().get(1);
+                    partner = chat.getCHATMEMBER().get(0);
                 }
 
-                int newMessages = chat.countNewMessages(this);
+                if(partner.getUser().getStatus() == UserStatus.ONLINE){
+                    preset = preset + "(*)";
+                }
+
+                preset = preset + partner.getUser().getUsername();
+
+                int newMessages = thisMember.getNewMessagesSize();
                 if(newMessages > 1){
                     writer.println(preset + " (" + newMessages + " neue Nachrichten)");
                 }
@@ -68,6 +76,7 @@ public class User {
                 else{
                     writer.println(preset);
                 }
+
             }
         }
         else{
@@ -78,14 +87,14 @@ public class User {
         writer.flush();
     }
 
-    public void addActiveChat(Chat chat){
-        chatliste.add(chat);
-    }
-
     public void deleteActiveChat(User chatpartner){
         for(Chat chat : chatliste){
-            if( ( (chat.getMEMBER()[0] == chatpartner) && (chat.getMEMBER()[1] == this) ) || ( (chat.getMEMBER()[1] == chatpartner) && (chat.getMEMBER()[0] == this) ) ){
-                chatliste.remove(chat);
+
+            for(ChatMember chatMember : chat.getCHATMEMBER()){
+                if(chatMember.getUser() == chatpartner){
+                    chatliste.remove(chat);
+                    chatpartner.chatliste.remove(chat);
+                }
             }
         }
     }

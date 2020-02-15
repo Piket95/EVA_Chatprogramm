@@ -9,109 +9,80 @@ import java.util.List;
 
 public class Chat {
 
-    private final User[] MEMBER;
+    private final List<ChatMember> CHATMEMBER;
     private final int ARCHIVE_SIZE = 10;
 
-    private ChatStatus userChatStatus0;
-    private ChatStatus userChatStatus1;
-
-    private List<Messages> newMessages;
-    private List<Messages> oldMessages;
+    private List<Message> archive;
 
     public Chat(User user1, User user2) {
-        this.MEMBER = new User[]{user1, user2};
-        this.newMessages = new ArrayList<>();
-        this.oldMessages = new ArrayList<>();
-
-        this.userChatStatus0 = ChatStatus.LEFT;
-        this.userChatStatus1 = ChatStatus.LEFT;
+        this.CHATMEMBER = new ArrayList<>();
+        CHATMEMBER.add(new ChatMember(user1));
+        CHATMEMBER.add(new ChatMember(user2));
+        this.archive = new ArrayList<>();
     }
 
-    public synchronized void sendMessage(Messages message){
-        if( (userChatStatus0 == ChatStatus.JOINED) && (userChatStatus1 == ChatStatus.JOINED) ){
-            MEMBER[0].getWriter().println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
-            MEMBER[1].getWriter().println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
+    public synchronized void sendMessage(ChatMember partner, Message message){
+        if((partner.getStatus() == ChatStatus.LEFT) && (partner.getUser().getStatus() == UserStatus.ONLINE)){
+            partner.addNewMessage(message);
+            message.getSender().getWriter().println(message.getMessage());
+            message.getSender().getWriter().flush();
 
-            oldMessages.add(message);
-            checkArchiveSize();
-
-            MEMBER[0].getWriter().flush();
-            MEMBER[1].getWriter().flush();
+            partner.getUser().getWriter().println();
+            partner.getUser().getWriter().println("Du hast eine neue Nachricht von \"" + message.getSender().getUsername() + "\" erhalten!");
+            partner.getUser().getWriter().println("Gib /chat " + message.getSender().getUsername() + " ein, um dem Chat beizutreten.");
+            partner.getUser().getWriter().flush();
+        }
+        else if(partner.getUser().getStatus() == UserStatus.OFFLINE){
+            partner.addNewMessage(message);
+            message.getSender().getWriter().println();
+            message.getSender().getWriter().println("Dein Gesprächspartner ist momentan Offline.");
+            message.getSender().getWriter().println("Die Nachricht wird zugestellt, sobald er wieder online kommt!");
+            message.getSender().getWriter().flush();
         }
         else{
-            newMessages.add(message);
+            archive.add(message);
+            checkArchiveSize();
 
-            if(message.getSender() == MEMBER[0]){
-                if( (MEMBER[1].getStatus() == UserStatus.ONLINE) && (this.userChatStatus1 == ChatStatus.LEFT) ){
-                    MEMBER[0].getWriter().println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
-                    MEMBER[1].getWriter().println();
-                    MEMBER[1].getWriter().println("Du hast eine neue Nachricht im Chat mit \"" + MEMBER[0].getUsername() + "\" erhalten!");
-                    MEMBER[1].getWriter().println("Gib /chat " + MEMBER[0].getUsername() + " ein, um den Chat zu betreten und die Nachricht zu lesen!");
+            partner.getUser().getWriter().println(message.getMessage());
+            partner.getUser().getWriter().flush();
 
-                    MEMBER[0].getWriter().flush();
-                    MEMBER[1].getWriter().flush();
-                }
-            }
-            else{
-                if( (MEMBER[0].getStatus() == UserStatus.ONLINE) && (this.userChatStatus0 == ChatStatus.LEFT) ){
-                    MEMBER[1].getWriter().println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
-                    MEMBER[0].getWriter().println();
-                    MEMBER[0].getWriter().println("Du hast eine neue Nachricht von " + MEMBER[1].getUsername() + " erhalten!");
-                    MEMBER[0].getWriter().println("Gib /chat " + MEMBER[1].getUsername() + " ein, um den Chat zu betreten und die Nachricht zu lesen!");
-
-                    MEMBER[0].getWriter().flush();
-                    MEMBER[1].getWriter().flush();
-                }
-            }
+            message.getSender().getWriter().println(message.getMessage());
+            message.getSender().getWriter().flush();
         }
     }
 
     //Wenn mehr als 10 Nachrichten im Archiv hinterlegt sind, wird die 1. gelöscht, damit insgesamt nur 10 Nachrichten in der Liste sind
-    public void checkArchiveSize(){
-        if (oldMessages.size() > ARCHIVE_SIZE) {
-            oldMessages.remove(0);
+    public synchronized void checkArchiveSize(){
+        while (archive.size() > ARCHIVE_SIZE) {
+            archive.remove(0);
         }
     }
 
-    public void getArchiv(PrintWriter writer){
+    public synchronized void printArchive(PrintWriter writer){
 
         writer.println();
-        writer.println("\"------------Letzten 10 Nachrichten dieser Konversation-----------\"");
-
-        if(oldMessages.size() == 0){
+        writer.println("------------Letzten 10 Nachrichten dieser Konversation-----------");
+        if(archive.size() == 0){
             writer.println("Archiv ist leer! Möglicherweise hat vorher noch kein Nachrichtenaustausch stattgefunden!");
         }
         else{
-            for(Messages messages : oldMessages){
-                writer.println("[" + messages.getTimestamp() + "] " + messages.getSender().getUsername() + ": " + messages.getMessage());
+            for(Message message : archive){
+                writer.println(message.getMessage());
             }
         }
         writer.println("------------------------------------------------------------------");
         writer.flush();
-
     }
 
-    public User[] getMEMBER() {
-        return MEMBER;
+    public synchronized void addArchiveMessage(Message message){
+        archive.add(message);
     }
 
-    public List<Messages> getNewMessages() {
-        return newMessages;
+    public List<ChatMember> getCHATMEMBER() {
+        return CHATMEMBER;
     }
 
-    public int countNewMessages(User me){
-        int counter = 0;
-
-        for(Messages messages : newMessages){
-            if(messages.getSender() != me){
-                counter++;
-            }
-        }
-
-        return counter;
-    }
-
-    public void getCommandList(PrintWriter writer){
+    public void printCommandList(PrintWriter writer){
 
         writer.println();
         writer.println("----------------------Liste der Chat-Befehle---------------------");
@@ -123,56 +94,42 @@ public class Chat {
 
     }
 
-    //TODO: Testen
-    public void joinChat(User joinedUser){
-        if(joinedUser == MEMBER[0]){
-            userChatStatus0 = ChatStatus.JOINED;
+    public void joinChat(ChatMember joinedUser, ChatMember partner){
+        joinedUser.setStatus(ChatStatus.JOINED);
 
-            if(userChatStatus1 == ChatStatus.JOINED){
-                MEMBER[1].getWriter().println();
-                MEMBER[1].getWriter().println(MEMBER[0].getUsername() + " hat den Chat betreten!");
-                MEMBER[1].getWriter().flush();
-            }
-        }
-        else{
-            userChatStatus1 = ChatStatus.JOINED;
+        joinedUser.getUser().getWriter().println();
+        joinedUser.getUser().getWriter().println("Du bist dem Chat mit \"" + partner.getUser().getUsername() + "\" erfolgreich beigetreten!");
+        joinedUser.getUser().getWriter().flush();
 
-            if(userChatStatus0 == ChatStatus.JOINED){
-                MEMBER[0].getWriter().println();
-                MEMBER[0].getWriter().println(MEMBER[1].getUsername() + " hat den Chat betreten!");
-                MEMBER[0].getWriter().flush();
-            }
+        if(partner.getStatus() == ChatStatus.JOINED){
+            partner.getUser().getWriter().println();
+            partner.getUser().getWriter().println("\"" + joinedUser.getUser().getUsername() + "\" ist dem Chat beigetreten!");
+            partner.getUser().getWriter().flush();
         }
     }
 
-    //TODO: Testen
-    public void leaveChat(User leavingUser){
-        if(MEMBER[0] == leavingUser){
-            userChatStatus0 = ChatStatus.LEFT;
-            MEMBER[1].getWriter().println();
-            MEMBER[1].getWriter().println(MEMBER[0].getUsername() + " hat den Chat verlassen!");
-            MEMBER[1].getWriter().flush();
-        }
-        else {
-            userChatStatus1 = ChatStatus.LEFT;
-            MEMBER[0].getWriter().println();
-            MEMBER[0].getWriter().println(MEMBER[1].getUsername() + " hat den Chat betreten!");
-            MEMBER[0].getWriter().flush();
-        }
+    public void leaveChat(ChatMember leavingUser, ChatMember partner){
+        leaveChat(leavingUser, partner,false);
     }
 
-    public void userDisconnectError(User currentUser){
-        leaveChat(currentUser);
-        if(MEMBER[0] == currentUser){
-            MEMBER[1].getWriter().println();
-            MEMBER[1].getWriter().println(MEMBER[0].getUsername() + " hat die Verbindung zum Server verloren!");
-            MEMBER[1].getWriter().flush();
-        }
-        else {
-            userChatStatus1 = ChatStatus.LEFT;
-            MEMBER[0].getWriter().println();
-            MEMBER[0].getWriter().println(MEMBER[1].getUsername() + " hat die Verbindung zum Server verloren!");
-            MEMBER[0].getWriter().flush();
+    public void leaveChat(ChatMember leavingUser, ChatMember partner, boolean disconnect){
+        leavingUser.setStatus(ChatStatus.LEFT);
+
+        leavingUser.getUser().getWriter().println();
+        leavingUser.getUser().getWriter().println("Du hast den Chat mit \"" + partner.getUser().getUsername() + "\" verlassen!");
+        leavingUser.getUser().getWriter().flush();
+
+        if(partner.getStatus() == ChatStatus.JOINED){
+            if(disconnect){
+                partner.getUser().getWriter().println();
+                partner.getUser().getWriter().println("\"" + leavingUser.getUser().getUsername() + "\" hat die Verbindung zum Server verloren!");
+                partner.getUser().getWriter().flush();
+            }
+            else{
+                partner.getUser().getWriter().println();
+                partner.getUser().getWriter().println("\"" + leavingUser.getUser().getUsername() + "\" hat den Chat verlassen!");
+                partner.getUser().getWriter().flush();
+            }
         }
     }
 }

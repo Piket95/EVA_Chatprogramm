@@ -1,7 +1,7 @@
 package de.dennisadam.eva.server;
 
 import de.dennisadam.eva.server.chat.Chat;
-import de.dennisadam.eva.server.chat.Messages;
+import de.dennisadam.eva.server.chat.Message;
 import de.dennisadam.eva.server.user.User;
 import de.dennisadam.eva.server.user.UserStatus;
 
@@ -143,8 +143,8 @@ public class ClientHandler implements Runnable {
             if(chat.countNewMessages(currentUser) != 0){
                 writer.println("-----------------Neue Nachrichten in Abwesenheit-----------------");
 
-                for(Messages messages : chat.getNewMessages()){
-                    writer.println("[" + messages.getTimestamp() + "] " + messages.getSender().getUsername() + ": " + messages.getMessage());
+                for(Messages message : chat.getNewMessages()){
+                    writer.println("[" + message.getTimestamp() + "] " + message.getSender().getUsername() + ": " + message.getMessage());
                 }
 
                 writer.println("-----------------------------------------------------------------");
