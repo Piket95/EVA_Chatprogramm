@@ -95,6 +95,7 @@ public class ClientHandler implements Runnable {
                                                     writer.println();
                                                     writer.println("Du hast dich erfolgreich unter dem Benutzernamen " + currentUser.getUsername() + " angemeldet!");
                                                     writer.flush();
+                                                    System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" hat sich am System angemeldet!");
 
                                                     //Anzeige der Liste mit den aktiven Chats dieses Users
                                                     currentUser.printChatList();
@@ -108,6 +109,9 @@ public class ClientHandler implements Runnable {
                                                 }
                                                 writer.flush();
                                             }
+                                        }
+                                        else{
+                                            throw new SocketException("Client shutdown");
                                         }
                                     }
                                 }
@@ -154,6 +158,7 @@ public class ClientHandler implements Runnable {
                                                                 writer.println();
                                                                 writer.println("Du hast dich erfolgreich unter dem Benutzernamen " + currentUser.getUsername() + " angemeldet!");
                                                                 writer.flush();
+                                                                System.out.println("[Server/TCP] \"" + currentUser.getUsername() + "\" hat sich am System registriert!");
 
                                                                 //Anzeige der Liste mit den aktiven Chats dieses Users
                                                                 currentUser.printChatList();
@@ -181,6 +186,9 @@ public class ClientHandler implements Runnable {
                                                 writer.flush();
                                             }
                                         }
+                                        else{
+                                            throw new SocketException("Client shutdown");
+                                        }
                                     }
                                 }
                                 else { //Beenden
@@ -200,6 +208,9 @@ public class ClientHandler implements Runnable {
                         } catch (NoSuchAlgorithmException e) {
                             e.printStackTrace();
                         }
+                    }
+                    else{
+                        throw new SocketException("Client shutdown");
                     }
                 }
 
@@ -250,6 +261,9 @@ public class ClientHandler implements Runnable {
                                     writer.flush();
                             }
                         }
+                    }
+                    else{
+                        throw new SocketException("Client shutdown");
                     }
                 }
             }
@@ -306,38 +320,42 @@ public class ClientHandler implements Runnable {
 
             try{
                 //Endlos warten auf Input
-                while((line = reader.readLine()) != null){
-
-                    //Prüfen ob aktueller Nutzer aus Chat rausgeschmissen wurde
-                    if(currentMember.getStatus() == ChatStatus.LEFT){
-                        break;
-                    }
-
-                    //Commands
-                    if(line.startsWith("/")){
-                        if(line.equals("/leave")){
-                            chat.leaveChat(currentMember, partner);
+                while(true){
+                    if((line = reader.readLine()) != null){
+                        //Prüfen ob aktueller Nutzer aus Chat rausgeschmissen wurde
+                        if(currentMember.getStatus() == ChatStatus.LEFT){
                             break;
                         }
+
+                        //Commands
+                        if(line.startsWith("/")){
+                            if(line.equals("/leave")){
+                                chat.leaveChat(currentMember, partner);
+                                break;
+                            }
+                            else{
+                                switch (line) {
+                                    case "/help":
+                                        chat.printCommandList(writer);
+                                        break;
+                                    case "/archiv":
+                                        chat.printArchive(writer);
+                                        break;
+                                    default:
+                                        writer.println();
+                                        writer.println("Der Befehl existiert nicht! Vielleicht hast du dich vertippt?");
+                                        writer.flush();
+                                }
+                            }
+                        }
                         else{
-                            switch (line) {
-                                case "/help":
-                                    chat.printCommandList(writer);
-                                    break;
-                                case "/archiv":
-                                    chat.printArchive(writer);
-                                    break;
-                                default:
-                                    writer.println();
-                                    writer.println("Der Befehl existiert nicht! Vielleicht hast du dich vertippt?");
-                                    writer.flush();
+                            if(!line.equals("")){
+                                chat.sendMessage(partner, new Message(currentUser, line));
                             }
                         }
                     }
                     else{
-                        if(!line.equals("")){
-                            chat.sendMessage(partner, new Message(currentUser, line));
-                        }
+                        throw new SocketException("Client shutdown");
                     }
                 }
             } catch (IOException e){
