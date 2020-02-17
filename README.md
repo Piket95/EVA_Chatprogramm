@@ -1,5 +1,5 @@
 # Client-Server Chat Anwendung (Konsolenanwendung)
-![HS-KL Logo](./src/img/Logo_of_Hochschule_Kaiserslautern.png)
+<img src="./src/img/Logo_of_Hochschule_Kaiserslautern.png" alt="HS-KL Logo" width="25%"/>
 
 **Projektarbeit im Fach "Entwicklung verteilter Anwendungen mit Java (EVA)"**
 Vertiefungsfach 5. Semster
@@ -63,4 +63,4 @@ Dieser muss nun nur im Hintergrund laufen und kann mithilfe von **Strg+C** "been
 Wer sich mit dem Server verbunden hat und ob er sich sauber vom Server getrennt hat oder die Verbindung verloren hat, kann man nun während der Laufzeit in der Konsole nachverfolgen.
 
 ## Message-Sequence Diagramm
-![Message-Sequence Chart](./src/branch/master/src/img/mscEvaProjekt.png)
+![Message-Sequence Chart](./src/img/mscEvaProjekt.png)
