@@ -39,7 +39,7 @@ Was möchtest du tun? (Zahl eingeben)
  
 4. Mithilfe der folgenden Befehle (im Programm mithilfe von **/help** aufrufbar) kann man nun die verschiedenen Funktionen des Programms nutzen:
 
-```bash
+```
 ------------------------Liste der Befehle------------------------
 /help                          Zeigt die Liste der verfügbaren Befehle (diese hier)
 /userlist                      Zeigt eine Liste der verfügbaren Benutzer an
@@ -55,13 +55,14 @@ Was möchtest du tun? (Zahl eingeben)
 
 In einem Chat hat man nun Zugriff auf einige Befehle, die sich von denen im "Menü" unterscheiden. Auch diese können mithilfe von **/help**, solange man sich in einem Chat befindet, angezeigt/aufgerufen werden.
 
-```bash
+```
 ----------------------Liste der Chat-Befehle---------------------
 /help        Zeigt die Liste der verfügbaren Befehle (diese hier)
 /archiv      Zeigt die letzten 10 Nachrichten an
 /leave       Verlasse den aktuellen Chat
 -----------------------------------------------------------------
 ```
+
 Sind beide dem Chat beigetreten, können beide Parteien normal miteinander schreiben. Ist der Gesprächspartner Online aber nicht im Chat, bekommt er eine Benachrichtigung, dass er in dem Chat eine neue Nachricht bekommen hat. Ist der Gesprächspartner Offline, wird die Nachricht zugestellt, sobald er wieder online gekommen ist.
 
 ### Server
