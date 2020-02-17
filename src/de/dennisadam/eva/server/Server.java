@@ -36,6 +36,8 @@ public class Server {
             System.out.println("Server erfolgreich gestartet!");
             System.out.println("Der Server ist nun auf dem Port \"" + serverSocket.getLocalPort() + "\" erreichbar...");
 
+            serverSocket.setSoTimeout(5*60000);
+
             //Listening starten (Server hört/wartet auf Anfragen)
             while(true){
                 try{
