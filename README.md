@@ -67,7 +67,7 @@ Sind beide dem Chat beigetreten, können beide Parteien normal miteinander schre
 
 ### Server
 
-Starten kann man den Server, indem man die Jar-Datei mit dem Port auf dem er laufen soll als Parameter
+Starten kann man den Server, indem man die JAR-Datei mit dem Port auf dem er laufen soll als Parameter
 
 ```bash
 java -jar Server.jar <Port>
