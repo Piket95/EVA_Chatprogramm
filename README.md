@@ -1,4 +1,5 @@
 # Client-Server Chat Anwendung (Konsolenanwendung)
+
 ![HS-KL Logo](https://www.hs-kl.de/typo3conf/ext/hskl_base/Resources/Public/Images/sprites/hskl-logo.svg)
 
 **Projektarbeit im Fach "Entwicklung verteilter Anwendungen mit Java (EVA)"**
@@ -15,23 +16,30 @@ Hochschule Kaiserslautern - Zweibrücken
 - [ ] Speichern der Daten im JSON-Format
 
 ## Bedienungsanleitung
+
 ### Client
 
- 1. Starten des Client 
+1. Starten des Client
+
 ```bash
 java -jar Client.jar <IP/Hostname> <Port>
 ```
- 2. Registrieren durch eingeben der Ziffer 2 / oder Einloggen mit Ziffer 1, falls bereits ein Account besteht
-```
+
+2. Registrieren durch eingeben der Ziffer 2 / oder Einloggen mit Ziffer 1, falls bereits ein Account besteht
+
+```bash
 Was möchtest du tun? (Zahl eingeben)
 (1) Einloggen
 (2) Registrieren
 (3) Programm beenden
 >2
 ```
- 3. Benutzername (keine Sonderzeichen und nicht leer) und Passwort (nicht leer) aussuchen und angeben
- 4. Mithilfe der folgenden Befehle (im Programm mithilfe von **/help** aufrufbar) kann man nun die verschiedenen Funktionen des Programms nutzen:
-```
+
+3. Benutzername (keine Sonderzeichen und nicht leer) und Passwort (nicht leer) aussuchen und angeben
+ 
+4. Mithilfe der folgenden Befehle (im Programm mithilfe von **/help** aufrufbar) kann man nun die verschiedenen Funktionen des Programms nutzen:
+
+```bash
 ------------------------Liste der Befehle------------------------
 /help                          Zeigt die Liste der verfügbaren Befehle (diese hier)
 /userlist                      Zeigt eine Liste der verfügbaren Benutzer an
@@ -42,9 +50,12 @@ Was möchtest du tun? (Zahl eingeben)
 /exit                          Meldet dich vom Server ab falls noch nicht geschehen und beendet die Anwendung
 -----------------------------------------------------------------
 ```
+
 5. Chatten kann man mithilfe von **/chat \<Benutzername>**
-In einem Chat hat man nun Zugriff auf einige Befehle, die sich von denen im "Menü" unterscheiden. Auch diese können mithilfe von **/help**, solange man sich in einem Chat befindet, angezeigt/aufgerufen werden. 
-```
+
+In einem Chat hat man nun Zugriff auf einige Befehle, die sich von denen im "Menü" unterscheiden. Auch diese können mithilfe von **/help**, solange man sich in einem Chat befindet, angezeigt/aufgerufen werden.
+
+```bash
 ----------------------Liste der Chat-Befehle---------------------
 /help        Zeigt die Liste der verfügbaren Befehle (diese hier)
 /archiv      Zeigt die letzten 10 Nachrichten an
@@ -53,14 +64,17 @@ In einem Chat hat man nun Zugriff auf einige Befehle, die sich von denen im "Men
 ```
 Sind beide dem Chat beigetreten, können beide Parteien normal miteinander schreiben. Ist der Gesprächspartner Online aber nicht im Chat, bekommt er eine Benachrichtigung, dass er in dem Chat eine neue Nachricht bekommen hat. Ist der Gesprächspartner Offline, wird die Nachricht zugestellt, sobald er wieder online gekommen ist.
 
-
 ### Server
+
 Starten kann man den Server, indem man die Jar-Datei mit dem Port auf dem er laufen soll als Parameter
-```
+
+```bash
 java -jar Server.jar <Port>
 ```
+
 Dieser muss nun nur im Hintergrund laufen und kann mithilfe von **Strg+C** "beendet" werden.
 Wer sich mit dem Server verbunden hat und ob er sich sauber vom Server getrennt hat oder die Verbindung verloren hat, kann man nun während der Laufzeit in der Konsole nachverfolgen.
 
 ## Message-Sequence Diagramm
+
 ![Message-Sequence Chart](./src/img/mscEvaProjekt.png)
