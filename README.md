@@ -1,5 +1,5 @@
 # Client-Server Chat Anwendung (Konsolenanwendung)
-<img src="./src/img/Logo_of_Hochschule_Kaiserslautern.png" alt="HS-KL Logo" width="25%"/>
+![HS-KL Logo](https://www.hs-kl.de/typo3conf/ext/hskl_base/Resources/Public/Images/sprites/hskl-logo.svg)
 
 **Projektarbeit im Fach "Entwicklung verteilter Anwendungen mit Java (EVA)"**
 Vertiefungsfach 5. Semster
